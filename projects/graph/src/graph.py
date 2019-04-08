@@ -53,6 +53,22 @@ class Graph:
                 if v not in visited:
                     self.dtf_recursive(v, visited)
 
+    def bft_search(self, starting_vertex, target):
+        q = []
+        q.append(starting_vertex)
+        visited = set()
+        while len(q) > 0:
+            v = q.pop()
+            print("searching", v)
+            if v == target:
+                return True
+            else:
+                visited.add(v)
+                for vert in self.vertices[v]:
+                    if vert not in visited:
+                        q.append(vert)
+        return False
+
 
 graph = Graph()
 graph.add_vertex("0")
@@ -65,4 +81,5 @@ graph.add_edge("0", "3")
 print(graph.vertices)
 # print(graph.bft("0"))
 # print(graph.dft("0"))
-print(graph.dtf_recursive("0"))
+# print(graph.dtf_recursive("0"))
+print(graph.bft_search("0", "2"))
