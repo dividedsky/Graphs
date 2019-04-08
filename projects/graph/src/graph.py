@@ -19,16 +19,23 @@ class Graph:
         else:
             raise IndexError("One of those vertices does not exist")
 
+    def add_directed_edge(self, v1, v2):
+        if v1 in self.vertices and v2 in self.vertices:
+            self.vertices[v1].add(v2)
+        else:
+            raise IndexError("One of those vertices does not exist")
+
     def bft(self, starting_vertex):
         q = []  # replace with queue later
         q.append(starting_vertex)
         visited = set()
         while len(q) > 0:
             v = q.pop(0)
-            visited.add(v)
-            print(v)
-            for vert in self.vertices[v]:  # add all of this vert's neighbors to queue
-                if vert not in visited:
+            if v not in visisted:
+                visited.add(v)
+                print(v)
+                for vert in self.vertices[v]:
+                    # add all of this vert's neighbors to queue
                     q.append(vert)
 
     def dft(self, starting_vertex):
@@ -43,7 +50,9 @@ class Graph:
                 if vert not in visited:
                     s.append(vert)
 
-    def dtf_recursive(self, starting_vertex, visited=set()):
+    def dtf_recursive(self, starting_vertex, visited=None):
+        if visited is None:
+            visited = set()
         print(starting_vertex)
         visited.add(starting_vertex)
         if len(self.vertices[starting_vertex]) == 0:
@@ -55,18 +64,21 @@ class Graph:
 
     def bft_search(self, starting_vertex, target):
         q = []
-        q.append(starting_vertex)
+        q.append([starting_vertex])
         visited = set()
         while len(q) > 0:
-            v = q.pop()
+            v = q.pop(0)
             print("searching", v)
-            if v == target:
-                return True
-            else:
-                visited.add(v)
-                for vert in self.vertices[v]:
-                    if vert not in visited:
-                        q.append(vert)
+            if v[-1] not in visited:
+                visited.add(v[-1])
+                if v[-1] == target:
+                    print(f"found {target}. shortest path is {v}")
+                    return True
+                else:
+                    for vert in self.vertices[v[-1]]:
+                        path = v.copy()
+                        path.append(vert)
+                        q.append(path)
         return False
 
 
@@ -75,11 +87,13 @@ graph.add_vertex("0")
 graph.add_vertex("1")
 graph.add_vertex("2")
 graph.add_vertex("3")
+graph.add_vertex("4")
 graph.add_edge("0", "1")
 graph.add_edge("1", "2")
 graph.add_edge("0", "3")
+graph.add_edge("3", "4")
 print(graph.vertices)
 # print(graph.bft("0"))
 # print(graph.dft("0"))
 # print(graph.dtf_recursive("0"))
-print(graph.bft_search("0", "2"))
+print(graph.bft_search("0", "4"))
