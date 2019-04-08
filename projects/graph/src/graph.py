@@ -43,6 +43,16 @@ class Graph:
                 if vert not in visited:
                     s.append(vert)
 
+    def dtf_recursive(self, starting_vertex, visited=set()):
+        print(starting_vertex)
+        visited.add(starting_vertex)
+        if len(self.vertices[starting_vertex]) == 0:
+            return
+        else:
+            for v in self.vertices[starting_vertex]:
+                if v not in visited:
+                    self.dtf_recursive(v, visited)
+
 
 graph = Graph()
 graph.add_vertex("0")
@@ -53,5 +63,6 @@ graph.add_edge("0", "1")
 graph.add_edge("1", "2")
 graph.add_edge("0", "3")
 print(graph.vertices)
-print(graph.bft("0"))
-print(graph.dft("0"))
+# print(graph.bft("0"))
+# print(graph.dft("0"))
+print(graph.dtf_recursive("0"))
