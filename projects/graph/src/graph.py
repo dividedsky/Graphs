@@ -18,3 +18,40 @@ class Graph:
             self.vertices[v2].add(v1)  #  add an edge from v2 to v1
         else:
             raise IndexError("One of those vertices does not exist")
+
+    def bft(self, starting_vertex):
+        q = []  # replace with queue later
+        q.append(starting_vertex)
+        visited = set()
+        while len(q) > 0:
+            v = q.pop(0)
+            visited.add(v)
+            print(v)
+            for vert in self.vertices[v]:  # add all of this vert's neighbors to queue
+                if vert not in visited:
+                    q.append(vert)
+
+    def dft(self, starting_vertex):
+        s = []  # replace with stack later?
+        s.append(starting_vertex)
+        visited = set()
+        while len(s) > 0:
+            v = s.pop()
+            print(v)
+            visited.add(v)
+            for vert in self.vertices[v]:
+                if vert not in visited:
+                    s.append(vert)
+
+
+graph = Graph()
+graph.add_vertex("0")
+graph.add_vertex("1")
+graph.add_vertex("2")
+graph.add_vertex("3")
+graph.add_edge("0", "1")
+graph.add_edge("1", "2")
+graph.add_edge("0", "3")
+print(graph.vertices)
+print(graph.bft("0"))
+print(graph.dft("0"))
