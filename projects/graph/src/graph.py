@@ -50,7 +50,7 @@ class Graph:
                 if vert not in visited:
                     s.append(vert)
 
-    def dtf_recursive(self, starting_vertex, visited=None):
+    def dft_recursive(self, starting_vertex, visited=None):
         if visited is None:
             visited = set()
         print(starting_vertex)
@@ -81,6 +81,23 @@ class Graph:
                         q.append(path)
         return False
 
+    def dft_search(self, starting_vertex, target):
+        s = []
+        s.append([starting_vertex])
+        visited = set()
+        while len(s) > 0:
+            v = s.pop()
+            if v[-1] not in visited:
+                visited.add(v[-1])
+                if v[-1] == target:
+                    print(f"fount {target} through path {v}")
+                    return True
+                else:
+                    for vert in self.vertices[v[-1]]:
+                        path = v.copy()
+                        path.append(vert)
+                        s.append(path)
+
 
 graph = Graph()
 graph.add_vertex("0")
@@ -88,12 +105,15 @@ graph.add_vertex("1")
 graph.add_vertex("2")
 graph.add_vertex("3")
 graph.add_vertex("4")
+graph.add_vertex("5")
 graph.add_edge("0", "1")
 graph.add_edge("1", "2")
 graph.add_edge("0", "3")
 graph.add_edge("3", "4")
+graph.add_edge("4", "5")
 print(graph.vertices)
 # print(graph.bft("0"))
 # print(graph.dft("0"))
-# print(graph.dtf_recursive("0"))
+# print(graph.dft_recursive("0"))
 print(graph.bft_search("0", "4"))
+print(graph.dft_search("0", "5"))
