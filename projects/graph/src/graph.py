@@ -98,6 +98,22 @@ class Graph:
                         path.append(vert)
                         s.append(path)
 
+    def dfs_r(self, start, target, visited=None, path=None):
+        if visited is None:
+            visited = set()
+        if path is None:
+            path = []
+        visited.add([start])
+        path = parth + [start]
+        if start == target:
+            return path
+        for child in self.vertices[start]:
+            if child not in visited:
+                new_path = self.dfs_r(child, target, visited, path)
+                if new_path:
+                    return new_path
+        return None
+
 
 graph = Graph()
 graph.add_vertex("0")
