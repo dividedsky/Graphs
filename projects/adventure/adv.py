@@ -17,7 +17,7 @@ world = World()
 
 # You may uncomment the smaller graphs for development and testing purposes.
 
-roomGraph = roomGraph_lg
+roomGraph = roomGraph_xxl
 world.loadGraph(roomGraph)
 
 # UNCOMMENT TO VIEW MAP
@@ -30,6 +30,7 @@ traversalPath = []
 rooms = {}
 unexplored = deque()
 unexplored.append(player.currentRoom.id)
+opposite_dirs = {"n": "s", "s": "n", "e": "w", "w": "e"}
 
 
 def get_random_move(room):
@@ -45,8 +46,7 @@ def get_random_move(room):
     return possible_moves[random_idx]
 
 
-def update_room_exits(room):
-    print(room.id)
+def add_room_exits(room):
     exits = room.getExits()
     if room.id not in rooms.keys():
         rooms[room.id] = {}
@@ -58,6 +58,21 @@ def update_room_exits(room):
             if room.id not in unexplored:
                 unexplored.append(room.id)
     # print(f"updated: {rooms}")
+
+
+def update_exits(prev_room, currentRoom, direction):
+    print(f"update exits\n--------\nprevious room: {prev_room}")
+    print(f"current room: {currentRoom}")
+    print(f"direction: {direction}")
+    # direction is how we got to the current room from the prev room
+    rooms[prev_room][direction] = currentRoom
+    if "?" not in rooms[prev_room].values() and prev_room in unexplored:
+        unexplored.remove(prev_room)
+    rooms[currentRoom][opposite_dirs[direction]] = prev_room
+    # print("here:", rooms[currentRoom][opposite_dirs[next_move]])
+    print(rooms[currentRoom])
+    if "?" not in rooms[currentRoom].values() and currentRoom in unexplored:
+        unexplored.remove(currentRoom)
 
 
 def reverse(path):
@@ -98,31 +113,27 @@ def get_shortest_path(start, target):
                     q.append(path + [neighbor])
 
 
-opposite_dirs = {"n": "s", "s": "n", "e": "w", "w": "e"}
-
 prev_room = None
-while unexplored:
+next_move = None
+while len(unexplored) > 0:
     currentRoom = player.currentRoom
-    update_room_exits(currentRoom)
-    if prev_room:
-        rooms[prev_room.id][next_move] = currentRoom.id
-        if "?" not in rooms[prev_room.id].values() and prev_room.id in unexplored:
-            unexplored.remove(prev_room.id)
-        rooms[currentRoom.id][opposite_dirs[next_move]] = prev_room.id
-        print("here:", rooms[currentRoom.id][opposite_dirs[next_move]])
-        print(rooms[currentRoom.id])
-        if "?" not in rooms[currentRoom.id].values() and currentRoom.id in unexplored:
-            unexplored.remove(currentRoom.id)
+    print("current room:", currentRoom.id)
+    if currentRoom not in rooms:
+        add_room_exits(currentRoom)
+    if prev_room and next_move:
+        update_exits(prev_room.id, currentRoom.id, next_move)
     next_move = get_random_move(currentRoom)
-    print(f"move: {next_move}")  # print the possible exits
+    # print(f"move: {next_move}")  # print the possible exits
     if next_move is None:
-        print("bumped into a wall. now what?")
-        print(f"unexplored is {unexplored}")
+        # print("bumped into a wall. now what?")
+        # print(f"unexplored is {unexplored}")
         # print(f" path is {path}")
+        if len(unexplored) == 0:
+            break
         shortest = get_shortest_path(
             currentRoom.id, unexplored[0]
         )  # this should pop off the unexplored list instead of 0
-        print(f"path back: {shortest}")
+        # print(f"path back: {shortest}")
         if shortest:
             reverse(shortest)
         next_move = get_random_move(player.currentRoom)
