@@ -1,6 +1,7 @@
 from room import Room
 from player import Player
 from world import World
+from collections import deque
 
 import random
 
@@ -543,7 +544,8 @@ player = Player("Name", world.startingRoom)
 traversalPath = []
 rooms = {}
 visited = set()  # not sure if we need this
-path = [player.currentRoom]
+path = []
+unexplored = deque()
 
 
 def get_random_move(room):
@@ -552,9 +554,10 @@ def get_random_move(room):
     for exit in exits:
         if rooms[room.id][exit] == "?":
             possible_moves.append(exit)
-    random_idx = random.randrange(len(possible_moves))
     if len(possible_moves) == 0:
         return None
+    random_idx = random.randrange(len(possible_moves))
+    print(f"possible: {possible_moves}")
     return possible_moves[random_idx]
 
 
@@ -568,10 +571,45 @@ def update_room_exits(room):
             rooms[currentRoom.id][
                 exit
             ] = "?"  # add all unexplored rooms to rooms dictionary
+            unexplored.append(currentRoom.id)
     print(f"updated: {rooms}")
 
-def reverse():
-    while path
+
+def reverse(path):
+    while len(path):
+        backtrack = path.pop()
+        print("reversing", backtrack)
+        traversalPath.append(backtrack)
+        player.travel(backtrack)
+
+
+def get_shortest_path(start, target):
+    q = deque()
+    q.append([start])
+    visited = {}
+    # print(q)
+    while len(q) > 0:
+        path = q.popleft()
+        room = path[-1]
+        # print(f"path is {path}")
+        if room not in visited:
+            visited[room] = path
+            # print(f"visited: {visited}")
+            if room == target:
+                # print(f"found target. shortest path: {path}")
+                shortest_path = []
+                for room in path:
+                    current = path.pop(0)  # this should be a queue?
+                    for d in rooms[current]:
+                        if rooms[current][d] == path[0]:
+                            shortest_path.append(d)
+
+                # print(f"shortest: {shortest_path}")
+                return shortest_path
+            # print("rooms:", rooms[room].values())
+            for neighbor in rooms[room].values():
+                q.append(path + [neighbor])
+
 
 opposite_dirs = {"n": "s", "s": "n", "e": "w", "w": "e"}
 
@@ -582,13 +620,29 @@ while canMoveForward:
     update_room_exits(currentRoom)
     if prev_room:
         rooms[prev_room.id][next_move] = currentRoom.id
+        if "?" not in rooms[prev_room.id].values():
+            unexplored.remove(prev_room.id)
         rooms[currentRoom.id][opposite_dirs[next_move]] = prev_room.id
     next_move = get_random_move(currentRoom)
     print(f"move: {next_move}")  # print the possible exits
     if next_move is None:
-        canMoveForward = False
+        # canMoveForward = False
+        print("bumped into a wall. now what?")
+        print(f" path is {path}")
+        shortest = get_shortest_path(
+            currentRoom.id, 0
+        )  # this should pop off the unexplored list instead of 0
+        reverse(shortest)
+        next_move = get_random_move(player.currentRoom)
+        if next_move is None:
+            canMoveForward = False
+        else:
+            prev_room = player.currentRoom
+            player.travel(next_move)
+
     else:
         traversalPath.append(next_move)
+        path.append(next_move)
         prev_room = currentRoom
         player.travel(next_move)
 
