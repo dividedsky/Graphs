@@ -131,7 +131,7 @@ while len(unexplored) > 0:
         if len(unexplored) == 0:
             break
         shortest = get_shortest_path(
-            currentRoom.id, unexplored[0]
+            currentRoom.id, unexplored[-1]
         )  # this should pop off the unexplored list instead of 0
         # print(f"path back: {shortest}")
         if shortest:
