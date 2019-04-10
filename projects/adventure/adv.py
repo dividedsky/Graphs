@@ -15,19 +15,51 @@ world = World()
 # 1: [(3, 6), {"s": 0, "n": 2}],
 # 2: [(3, 7), {"s": 1}],
 # }
+# roomGraph = {
+#     0: [(3, 5), {"n": 1, "s": 5, "e": 3, "w": 7}],
+#     1: [(3, 6), {"s": 0, "n": 2}],
+#     2: [(3, 7), {"s": 1}],
+#     3: [(4, 5), {"w": 0, "e": 4}],
+#     4: [(5, 5), {"w": 3}],
+#     5: [(3, 4), {"n": 0, "s": 6}],
+#     6: [(3, 3), {"n": 5}],
+#     7: [(2, 5), {"w": 8, "e": 0}],
+#     8: [(1, 5), {"e": 7}],
+# }
+# roomGraph = {
+#     0: [(3, 5), {"n": 1, "s": 5, "e": 3, "w": 7}],
+#     1: [(3, 6), {"s": 0, "n": 2}],
+#     2: [(3, 7), {"s": 1}],
+#     3: [(4, 5), {"w": 0, "e": 4}],
+#     4: [(5, 5), {"w": 3}],
+#     5: [(3, 4), {"n": 0, "s": 6}],
+#     6: [(3, 3), {"n": 5, "w": 11}],
+#     7: [(2, 5), {"w": 8, "e": 0}],
+#     8: [(1, 5), {"e": 7}],
+#     9: [(1, 4), {"n": 8, "s": 10}],
+#     10: [(1, 3), {"n": 9, "e": 11}],
+#     11: [(2, 3), {"w": 10, "e": 6}],
+# }
 roomGraph = {
     0: [(3, 5), {"n": 1, "s": 5, "e": 3, "w": 7}],
-    1: [(3, 6), {"s": 0, "n": 2}],
+    1: [(3, 6), {"s": 0, "n": 2, "e": 12, "w": 15}],
     2: [(3, 7), {"s": 1}],
     3: [(4, 5), {"w": 0, "e": 4}],
     4: [(5, 5), {"w": 3}],
     5: [(3, 4), {"n": 0, "s": 6}],
-    6: [(3, 3), {"n": 5}],
+    6: [(3, 3), {"n": 5, "w": 11}],
     7: [(2, 5), {"w": 8, "e": 0}],
     8: [(1, 5), {"e": 7}],
+    9: [(1, 4), {"n": 8, "s": 10}],
+    10: [(1, 3), {"n": 9, "e": 11}],
+    11: [(2, 3), {"w": 10, "e": 6}],
+    12: [(4, 6), {"w": 1, "e": 13}],
+    13: [(5, 6), {"w": 12, "n": 14}],
+    14: [(5, 7), {"s": 13}],
+    15: [(2, 6), {"e": 1, "w": 16}],
+    16: [(1, 6), {"n": 17, "e": 15}],
+    17: [(1, 7), {"s": 16}],
 }
-# roomGraph={0: [(3, 5), {'n': 1, 's': 5, 'e': 3, 'w': 7}], 1: [(3, 6), {'s': 0, 'n': 2}], 2: [(3, 7), {'s': 1}], 3: [(4, 5), {'w': 0, 'e': 4}], 4: [(5, 5), {'w': 3}], 5: [(3, 4), {'n': 0, 's': 6}], 6: [(3, 3), {'n': 5, 'w': 11}], 7: [(2, 5), {'w': 8, 'e': 0}], 8: [(1, 5), {'e': 7}], 9: [(1, 4), {'n': 8, 's': 10}], 10: [(1, 3), {'n': 9, 'e': 11}], 11: [(2, 3), {'w': 10, 'e': 6}]}
-# roomGraph={0: [(3, 5), {'n': 1, 's': 5, 'e': 3, 'w': 7}], 1: [(3, 6), {'s': 0, 'n': 2, 'e': 12, 'w': 15}], 2: [(3, 7), {'s': 1}], 3: [(4, 5), {'w': 0, 'e': 4}], 4: [(5, 5), {'w': 3}], 5: [(3, 4), {'n': 0, 's': 6}], 6: [(3, 3), {'n': 5, 'w': 11}], 7: [(2, 5), {'w': 8, 'e': 0}], 8: [(1, 5), {'e': 7}], 9: [(1, 4), {'n': 8, 's': 10}], 10: [(1, 3), {'n': 9, 'e': 11}], 11: [(2, 3), {'w': 10, 'e': 6}], 12: [(4, 6), {'w': 1, 'e': 13}], 13: [(5, 6), {'w': 12, 'n': 14}], 14: [(5, 7), {'s': 13}], 15: [(2, 6), {'e': 1, 'w': 16}], 16: [(1, 6), {'n': 17, 'e': 15}], 17: [(1, 7), {'s': 16}]}
 """
 roomGraph = {
     494: [(1, 8), {"e": 457}],
@@ -546,6 +578,7 @@ rooms = {}
 visited = set()  # not sure if we need this
 path = []
 unexplored = deque()
+unexplored.append(player.currentRoom.id)
 
 
 def get_random_move(room):
@@ -571,13 +604,15 @@ def update_room_exits(room):
             rooms[currentRoom.id][
                 exit
             ] = "?"  # add all unexplored rooms to rooms dictionary
-            unexplored.append(currentRoom.id)
-    print(f"updated: {rooms}")
+            if room.id not in unexplored:
+                unexplored.append(room.id)
+    # print(f"updated: {rooms}")
 
 
 def reverse(path):
+    print("unexplored:", unexplored)
     while len(path):
-        backtrack = path.pop()
+        backtrack = path.pop(0)
         print("reversing", backtrack)
         traversalPath.append(backtrack)
         player.travel(backtrack)
@@ -600,44 +635,55 @@ def get_shortest_path(start, target):
                 shortest_path = []
                 for room in path:
                     current = path.pop(0)  # this should be a queue?
-                    for d in rooms[current]:
-                        if rooms[current][d] == path[0]:
-                            shortest_path.append(d)
+                    for exit in rooms[current]:
+                        if rooms[current][exit] == path[0]:
+                            shortest_path.append(exit)
 
                 # print(f"shortest: {shortest_path}")
                 return shortest_path
             # print("rooms:", rooms[room].values())
             for neighbor in rooms[room].values():
-                q.append(path + [neighbor])
+                if neighbor is not "?":
+                    q.append(path + [neighbor])
 
 
 opposite_dirs = {"n": "s", "s": "n", "e": "w", "w": "e"}
 
 canMoveForward = True
 prev_room = None
-while canMoveForward:
+while unexplored:
     currentRoom = player.currentRoom
     update_room_exits(currentRoom)
     if prev_room:
         rooms[prev_room.id][next_move] = currentRoom.id
-        if "?" not in rooms[prev_room.id].values():
+        if "?" not in rooms[prev_room.id].values() and prev_room.id in unexplored:
             unexplored.remove(prev_room.id)
         rooms[currentRoom.id][opposite_dirs[next_move]] = prev_room.id
+        print("here:", rooms[currentRoom.id][opposite_dirs[next_move]])
+        print(rooms[currentRoom.id])
+        if "?" not in rooms[currentRoom.id].values() and currentRoom.id in unexplored:
+            unexplored.remove(currentRoom.id)
     next_move = get_random_move(currentRoom)
     print(f"move: {next_move}")  # print the possible exits
     if next_move is None:
         # canMoveForward = False
         print("bumped into a wall. now what?")
-        print(f" path is {path}")
+        print(f"unexplored is {unexplored}")
+        # print(f" path is {path}")
         shortest = get_shortest_path(
-            currentRoom.id, 0
+            currentRoom.id, unexplored[0]
         )  # this should pop off the unexplored list instead of 0
-        reverse(shortest)
+        print(f"path back: {shortest}")
+        if shortest:
+            reverse(shortest)
         next_move = get_random_move(player.currentRoom)
         if next_move is None:
-            canMoveForward = False
+            # canMoveForward = False
+            if currentRoom.id in unexplored:
+                unexplored.remove(currentRoom.id)
         else:
             prev_room = player.currentRoom
+            traversalPath.append(next_move)
             player.travel(next_move)
 
     else:
