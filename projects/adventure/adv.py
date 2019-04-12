@@ -21,19 +21,20 @@ roomGraph = roomGraph_xxl
 world.loadGraph(roomGraph)
 
 # UNCOMMENT TO VIEW MAP
-world.printRooms()
+# world.printRooms()
 
 player = Player("Name", world.startingRoom)
 
 # FILL THIS IN
 traversalPath = []
-rooms = {}
-unexplored = deque()
+rooms = {}  # graph to store room info
+unexplored = deque()  # queue storing unexplored rooms
 unexplored.append(player.currentRoom.id)
 opposite_dirs = {"n": "s", "s": "n", "e": "w", "w": "e"}
 
 
 def get_random_move(room):
+    # returns a random direction from the unexplored room exits
     exits = room.getExits()
     possible_moves = []
     for exit in exits:
@@ -42,11 +43,11 @@ def get_random_move(room):
     if len(possible_moves) == 0:
         return None
     random_idx = random.randrange(len(possible_moves))
-    print(f"possible: {possible_moves}")
     return possible_moves[random_idx]
 
 
 def add_room_exits(room):
+    # adds exits for new room
     exits = room.getExits()
     if room.id not in rooms.keys():
         rooms[room.id] = {}
@@ -57,47 +58,41 @@ def add_room_exits(room):
             ] = "?"  # add all unexplored rooms to rooms dictionary
             if room.id not in unexplored:
                 unexplored.append(room.id)
-    # print(f"updated: {rooms}")
 
 
 def update_exits(prev_room, currentRoom, direction):
-    print(f"update exits\n--------\nprevious room: {prev_room}")
-    print(f"current room: {currentRoom}")
-    print(f"direction: {direction}")
-    # direction is how we got to the current room from the prev room
+    # add this room to previous room's exit list
     rooms[prev_room][direction] = currentRoom
     if "?" not in rooms[prev_room].values() and prev_room in unexplored:
+        # if we marked the last exit, remove the previous room from the unexplored list
         unexplored.remove(prev_room)
+
+    # add the previous room to this room's exit list
     rooms[currentRoom][opposite_dirs[direction]] = prev_room
-    # print("here:", rooms[currentRoom][opposite_dirs[next_move]])
-    print(rooms[currentRoom])
     if "?" not in rooms[currentRoom].values() and currentRoom in unexplored:
+        # if we've filled in the last exit, remove this room from the unexplored list
         unexplored.remove(currentRoom)
 
 
 def reverse(path):
-    print("unexplored:", unexplored)
+    # takes a path and reverses the player
     while len(path):
         backtrack = path.pop(0)
-        print("reversing", backtrack)
         traversalPath.append(backtrack)
         player.travel(backtrack)
 
 
 def get_shortest_path(start, target):
+    # breadth-first search to find the closest unexplored room
     q = deque()
     q.append([start])
     visited = {}
-    # print(q)
     while len(q) > 0:
         path = q.popleft()
         room = path[-1]
-        # print(f"path is {path}")
         if room not in visited:
             visited[room] = path
-            # print(f"visited: {visited}")
             if room == target:
-                # print(f"found target. shortest path: {path}")
                 shortest_path = []
                 for room in path:
                     current = path.pop(0)  # this should be a queue?
@@ -105,9 +100,7 @@ def get_shortest_path(start, target):
                         if rooms[current][exit] == path[0]:
                             shortest_path.append(exit)
 
-                # print(f"shortest: {shortest_path}")
                 return shortest_path
-            # print("rooms:", rooms[room].values())
             for neighbor in rooms[room].values():
                 if neighbor is not "?":
                     q.append(path + [neighbor])
@@ -117,26 +110,25 @@ prev_room = None
 next_move = None
 while len(unexplored) > 0:
     currentRoom = player.currentRoom
-    print("current room:", currentRoom.id)
     if currentRoom not in rooms:
+        # if this room has not been mapped, map it
         add_room_exits(currentRoom)
     if prev_room and next_move:
+        # if we moved here from a previous room, update that room's map
         update_exits(prev_room.id, currentRoom.id, next_move)
+    # get a random move
     next_move = get_random_move(currentRoom)
-    # print(f"move: {next_move}")  # print the possible exits
     if next_move is None:
-        # print("bumped into a wall. now what?")
-        # print(f"unexplored is {unexplored}")
-        # print(f" path is {path}")
+        # if we have nowhere to move, and the unexplored list is empty, we're done
         if len(unexplored) == 0:
             break
-        shortest = get_shortest_path(
-            currentRoom.id, unexplored[-1]
-        )  # this should pop off the unexplored list instead of 0
-        # print(f"path back: {shortest}")
+        # otherwise, get the path to the closest unexplored room
+        shortest = get_shortest_path(currentRoom.id, unexplored[-1])
         if shortest:
+            # if we've found a path, backtrack to that room
             reverse(shortest)
         next_move = get_random_move(player.currentRoom)
+        # if we're at a dead end, mark this room as exlored
         if next_move is None:
             if currentRoom.id in unexplored:
                 unexplored.remove(currentRoom.id)
@@ -145,9 +137,9 @@ while len(unexplored) > 0:
             traversalPath.append(next_move)
             player.travel(next_move)
 
+    # if next_move is not None, go to the next room
     else:
         traversalPath.append(next_move)
-        # path.append(next_move)
         prev_room = currentRoom
         player.travel(next_move)
 

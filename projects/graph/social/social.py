@@ -91,7 +91,8 @@ class SocialGraph:
                 visited[friend] = path
                 # add friend's friends to q
                 for f in self.friendships[friend]:
-                    q.append(path + [f])
+                    # if f not in visited?
+                    q.append(path + [f]) # unclear if this is okay or if I need to copy the path
 
         return visited
 
